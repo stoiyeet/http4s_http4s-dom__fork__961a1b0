@@ -37,6 +37,7 @@ import scodec.bits.ByteVector
 
 import scala.scalajs.js
 
+import scala.concurrent.duration._
 final class WSException private[dom] (
     private[dom] val reason: String
 ) extends RuntimeException(reason)
@@ -110,7 +111,7 @@ object WSClient {
                 case Some(reason) => ws.close(1000, reason)
                 case None => ws.close(1000)
               }
-            }.flatMap(close.complete(_)) *> messages.offer(None)
+            }.flatMap(close.complete(_)).timeout(5.seconds).attempt.void
         }
       } yield new WSConnection[F] {
 
